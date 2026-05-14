@@ -1,0 +1,43 @@
+#include <VirtualWire.h>
+// CODIGO RECEPTOR
+void setup()
+{
+   // CÓDIGO PARA LIGAR/DESLIGAR LED
+   pinMode(13, OUTPUT);
+
+   vw_set_rx_pin(0);
+   vw_set_ptt_inverted(true);
+   vw_setup(2000);
+
+   vw_rx_start();
+   // FIM
+
+   pinMode(8, INPUT_PULLUP);
+   vw_set_tx_pin(1);
+
+}
+
+void loop()
+{
+   // CÓDIGO PARA LIGAR/DESLIGAR LED
+   uint8_t buf[VW_MAX_MESSAGE_LEN];
+   uint8_t buflen = VW_MAX_MESSAGE_LEN;
+   if (vw_get_message(buf, &buflen))
+   {
+      if (buf[0]=='L') digitalWrite(13, HIGH);
+      else digitalWrite(13, LOW);
+   }
+   // FIM
+
+   char *msg_pisca;
+   if (!digitalRead(8)) {
+      msg_pisca = "P";
+   } else {
+      msg_pisca = "s";
+   }
+
+   vw_send((uint8_t *)msg_pisca, strlen(msg_pisca));
+   vw_wait_tx();
+   delay(20);
+
+}
