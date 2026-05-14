@@ -1,0 +1,54 @@
+#include <VirtualWire.h>
+// CODIGO TRANSMISSOR
+char *msg;
+bool led_sit;
+bool piscar;
+
+void setup() {
+
+  //CÓDIGO LIGAR/DESLIGAR LED
+  pinMode(8, INPUT_PULLUP);
+
+  vw_set_tx_pin(1);
+  vw_set_ptt_inverted(true);
+  vw_setup(2000);
+  // FIM
+
+  pinMode(13, OUTPUT);
+  vw_set_rx_pin(0);
+  vw_rx_start();
+}
+
+void loop() {
+
+  //CÓDIGO LIGAR/DESLIGAR LED
+  if(!led_sit && !digitalRead(8)) {
+    msg = "L";
+    led_sit = true;
+  }
+
+  else if (led_sit && !digitalRead(8)) {
+    msg = "D";
+    led_sit = false;
+  }
+
+  vw_send((uint8_t *)msg, strlen(msg));
+  vw_wait_tx();
+  delay(50);
+  // FIM
+
+  uint8_t buf[VW_MAX_MESSAGE_LEN];
+    uint8_t buflen = VW_MAX_MESSAGE_LEN;
+
+    if (vw_get_message(buf, &buflen)) {
+      if (buf[0] == 'P') piscar = true;
+      else if (buf[0] == 'S') piscar = false;
+    }
+
+    if (piscar) {
+      digitalWrite(13, (millis() / 250) % 2); // Pisca 2Hz
+    } else {
+      digitalWrite(13, LOW);
+    }
+
+}
